@@ -1,6 +1,8 @@
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 
+ENV DEBIAN_FRONTEND=noninteractive
 ARG workdir="/root"
+COPY ./sources.list  /etc/apt/sources.list
 
 RUN apt-get update && apt-get install -y \
 	nginx	\
@@ -15,5 +17,6 @@ ADD config-render.py ${workdir}/config-render.py
 
 # add kick-update
 ADD kick-update.py ${workdir}/kick-update.py
+ADD ./nante-wan.conf /etc/nante-wan.conf
 
 CMD bash -c "/root/config-render.py /etc/nante-wan.conf && nginx && /root/kick-update.py -c /etc/nante-wan.conf -d /var/www/html"

@@ -1,6 +1,8 @@
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 
+ENV DEBIAN_FRONTEND=noninteractive
 ARG workdir="/root"
+COPY ./sources.list  /etc/apt/sources.list
 
 # install required packages
 RUN apt-get update && apt-get install -y \
@@ -9,5 +11,5 @@ RUN apt-get update && apt-get install -y \
 
 # setup sdwconfig
 ADD portconfig.py ${workdir}/portconfig.py
-
+ADD ./nante-wan.conf /etc/nante-wan.conf
 CMD bash -c "/root/portconfig.py /etc/nante-wan.conf"

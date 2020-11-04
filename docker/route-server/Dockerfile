@@ -1,6 +1,8 @@
-FROM ubuntu:17.10
+FROM ubuntu:18.04
 
+ENV DEBIAN_FRONTEND=noninteractive
 ARG workdir="/root"
+COPY ./sources.list  /etc/apt/sources.list
 
 # install required packages and usuful applications
 RUN apt-get update && apt-get install -y \
@@ -58,24 +60,14 @@ RUN cd ${workdir}	\
 ADD daemons /etc/frr/daemons
 
 # setup StrongSwan
-RUN cd ${workdir}	\
-	&& git clone -b tteras --depth=1 \
-		git://git.alpinelinux.org/user/tteras/strongswan
-RUN cd ${workdir}/strongswan	\
-	&& autoreconf -i || true	\
-	&& autoconf		\
-	&& autoreconf -i	\
-	&& ./configure		\
-	&& make	-j 4 || true	\
-	&& make	-j 4 || true	\
-	&& make	-j 4		\
-	&& make install		\
+RUN apt install -y strongswan	\
 	&& rm -f /usr/local/etc/ipsec.conf
 ADD ipsec.conf /usr/local/etc/ipsec.conf
 
 # setup Config Render
 ADD templates ${workdir}/templates
 ADD config-render.py ${workdir}/config-render.py
+ADD ./nante-wan.conf /etc/nante-wan.conf
 
 
 CMD bash -c "/root/config-render.py /etc/nante-wan.conf && /usr/lib/frr/frr start && ipsec start && bash"
